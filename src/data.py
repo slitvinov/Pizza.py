@@ -222,13 +222,8 @@ class data:
   def newxyz(self,dm,ntime):
     nsnap = dm.findtime(ntime)
 
-    if dm.scaled(nsnap): scaleflag = 1
-    else: scaleflag = 0
     dm.sort(ntime)
-    
-    if scaleflag: dm.unscale(ntime)
     x,y,z = dm.vecs(ntime,"x","y","z")
-    if scaleflag: dm.scale(ntime)
 
     self.replace("Atoms",self.names['x']+1,x)
     self.replace("Atoms",self.names['y']+1,y)

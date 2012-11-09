@@ -2,7 +2,7 @@
 "Pizza.py Documentation"_pd - "Pizza.py Tools"_pt - "Next
 Section"_Section_tools.html :c
 
-:link(pws,http://www.cs.sandia.gov/~sjplimp/pizza.html)
+:link(pws,http://pizza.sandia.gov)
 :link(pd,Manual.html)
 :link(pt,Section_tools.html)
 
@@ -77,9 +77,13 @@ directories you list in the src/DEFAULTS.py file.  This means you can
 add your own scripts to pizza/scripts or to directories of your
 choosing.
 
-The argument of the -c switch will typically need to be enclosed in
-quotes to avoid being interpreted by the shell.  This also allows
-multiple Python commands to be separated by semi-colons, e.g.
+Note that the arguments of the -f switch file (arg1,arg2,etc) cannot
+begin with a single "-" or they will be interpreted as arguments to
+Pizza.py.  They can however begin with a double "--".
+
+Also note that the argument of the -c switch will typically need to be
+enclosed in quotes to avoid being interpreted by the shell.  This also
+allows multiple Python commands to be separated by semi-colons, e.g.
 
 -c "a = range(100); print a" :pre
 

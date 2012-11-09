@@ -2,7 +2,7 @@
 "Pizza.py Documentation"_pd - "Pizza.py Tools"_pt - "Next
 Section"_Section_examples.html :c
 
-:link(pws,http://www.cs.sandia.gov/~sjplimp/pizza.html)
+:link(pws,http://pizza.sandia.gov)
 :link(pd,Manual.html)
 :link(pt,Section_tools.html)
 

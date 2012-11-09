@@ -1,5 +1,4 @@
 # simple test of vcr tool
-# requires files/bucky*png files
 
 d = dump("files/dump.micelle")
 dt = data("files/data.micelle")

@@ -17,7 +17,7 @@
 
 # Help strings:
 
-version = "9 Feb 2012"
+version = "5 Aug 2012"
 
 intro = """
 Pizza.py (%s), a toolkit written in Python
@@ -272,15 +272,21 @@ while (iarg < len(sys.argv)):
       no_tools.append(sys.argv[jarg])
       jarg += 1
     iarg = jarg
+
+  # allow for "--" as arg to script and not Pizza.py arg
+    
   elif (sys.argv[iarg] == "-f"):
     jarg = iarg + 1
     list = []
-    while (jarg < len(sys.argv) and sys.argv[jarg][0] != '-'):
+    while (jarg < len(sys.argv) and
+           (sys.argv[jarg][0] != '-' or
+            (len(sys.argv[jarg]) >= 3 and sys.argv[jarg][0:2] == "--"))):
       list.append(sys.argv[jarg])
       jarg += 1
     task = ("script",list)
     tasks.append(task)
     iarg = jarg
+    
   elif (sys.argv[iarg] == "-c"):
     jarg = iarg + 1
     list = []

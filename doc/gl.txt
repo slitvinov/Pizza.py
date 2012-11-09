@@ -1,6 +1,6 @@
 "Pizza.py WWW Site"_pws - "Pizza.py Documentation"_pd - "Pizza.py Tools"_pc :c
 
-:link(pws,http://www.cs.sandia.gov/~sjplimp/pizza.html)
+:link(pws,http://pizza.sandia.gov)
 :link(pd,Manual.html)
 :link(pc,Section_tools.html)
 
@@ -86,13 +86,13 @@ is reloaded.
 
 [Usage:]
 
-g = gl(d)                   create OpenGL display for data in d :pre
+g = gl(d)                   create OpenGL display for data in d
+g = gl(d,N)                 window of size NxN (def = 512x512)
+g = gl(d,N,M)               window of size NxM :pre
 
   d = atom snapshot object (dump, data) :pre
 
 g.bg("black")               set background color (def = "black")
-g.size(N)		    set image size to NxN
-g.size(N,M)		    set image size to NxM
 g.rotate(60,135)            view from z theta and azimuthal phi (def = 60,30)
 g.shift(x,y)                translate by x,y pixels in view window (def = 0,0)
 g.zoom(0.5)                 scale image by factor (def = 1)

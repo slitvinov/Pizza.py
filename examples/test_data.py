@@ -1,5 +1,5 @@
 # simple test of data tool
-# requires files/data.micelle
+# requires files/data.micelle and dump.micelle
 # creates tmp.data
 
 d = data("files/data.micelle")

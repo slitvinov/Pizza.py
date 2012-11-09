@@ -15,16 +15,20 @@ p = patch(vfrac)           setup box with a specified volume fraction
 p = patch(vfrac,1,1,2)     x,y,z = aspect ratio of box (def = 1,1,1)
     
 p.seed = 48379		   set random # seed (def = 12345)
-p.randomized = 0	   1 = choose next particle randomly, 0 = as generated
+p.randomized = 0	   1 = choose next mol randomly (def), 0 = as generated
 p.dim = 2		   set dimension of created box (def = 3)
 p.blen = 0.97              set length of tether bonds (def = 0.97)
 p.dmin = 1.02              set min r from i-1 to i+1 tether site (def = 1.02)
 p.lattice = [Nx,Ny,Nz]     generate Nx by Ny by Nz lattice of particles
+p.displace = [Dx,Dy,Dz]    displace particles randomly by +/- Dx,Dy,Dz
 
-  if lattice is set, Nx*Ny*Nz must equal N for build
-  lattice = [0,0,0] = generate N particles randomly, default
+  randomized means choose molecules in random order when creating output
+  if lattice is set, Nx*Ny*Nz must equal N for build (Nz = 1 for 2d)
+  lattice = [0,0,0] = generate N particles randomly = default
+  displace = [0,0,0] = default
+  displacement applied when writing molecule to data file
 
-p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with types 1,2,3
+p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with params 1,2,3
   
   can be invoked multiple times
   keywords:
@@ -36,10 +40,11 @@ p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with types 1,2,3
     tri5: 1,2 = 3-layer 5-size hollow tri, types 1,2
     rod: N,m1,m2,1,2,3 = N-length rod with m12-len tethers, types 1,2,3
     tri: N,m1,m2,m3,1,2,3,4 = N-size tri with m123-len tethers, types 1-4
+    trid2d: N,r,1 = 3d equilateral tri, N beads r apart, type 1, no bonds
     hex: m1,m2,m3,m4,m5,m6,1,2,3,4,5,6,7 = 7-atom hex with m-len tethers, t 1-7
     dimer: r,1 = two particles r apart, type 1, no bond
     star2d: N,r,1 = 2d star of length N (odd), beads r apart, type 1, no bonds
-    box2d: N,M,r,1 = 2d NxM box, beads r apart, type 1, no bonds
+    box2d: N,M,r,1 = 2d NxM hollow box, beads r apart, type 1, no bonds
     tritet: A,m = 4-tri tet with edge length A, tri type m
     tribox: Alo,Ahi,Blo,Bhi,Clo,Chi,m = 12-tri box with side lengths A,B,C & m
     linebox: Alo,Ahi,Blo,Bhi,m = 4-line 2d rectangle with random side lengths
@@ -87,6 +92,7 @@ class patch:
     self.blen = 0.97
     self.dmin = 1.02
     self.lattice = [0,0,0]
+    self.displace = [0.0,0.0,0.0]
     self.style = "molecular"
 
   # --------------------------------------------------------------------
@@ -209,6 +215,7 @@ class patch:
       # unpack atoms in molecule
       # xnew,ynew,xnew = coeffs in new rotated basis vectors
       # x,y,z = coeffs in original xyz axes
+      # apply random displace to final x,y,z for molecular style
       # format data file for moleular or tri atom style
 
       if self.style == "molecular":
@@ -220,6 +227,9 @@ class patch:
           x = xorig + xnew*xp[0] + ynew*yp[0] + znew*zp[0]
           y = yorig + xnew*xp[1] + ynew*yp[1] + znew*zp[1]
           z = zorig + xnew*xp[2] + ynew*yp[2] + znew*zp[2]
+          x += (self.random()-0.5)*2*self.displace[0]
+          y += (self.random()-0.5)*2*self.displace[1]
+          z += (self.random()-0.5)*2*self.displace[2]
           ix = iy = iz = 0
           x,y,z,ix,iy,iz = self.pbc(x,y,z,ix,iy,iz)
           atoms.append([idatom,idmol,atom[0],x,y,z,ix,iy,iz])
@@ -401,6 +411,7 @@ class patch:
       # unpack atoms in molecule
       # xnew,ynew,xnew = coeffs in new rotated basis vectors
       # x,y,z = coeffs in original xyz axes
+      # apply random displace to final x,y for molecular style
       # format data file for moleular or line atom style
 
       if self.style == "molecular":
@@ -411,6 +422,8 @@ class patch:
           x = xorig + xnew*xp[0] + ynew*yp[0]
           y = yorig + xnew*xp[1] + ynew*yp[1]
           z = atom[3]
+          x += (self.random()-0.5)*2*self.displace[0]
+          y += (self.random()-0.5)*2*self.displace[1]
           ix = iy = iz = 0
           x,y,z,ix,iy,iz = self.pbc(x,y,z,ix,iy,iz)
           atoms.append([idatom,idmol,atom[0],x,y,z,ix,iy,iz])
@@ -789,6 +802,33 @@ class patch:
 
     volume = (nsize*(nsize+1)/2 + m1+m2+m3) * pi / 6.0
     return atoms,bonds,[],[],volume
+
+  # --------------------------------------------------------------------
+  # params = N,sep,type
+  # N = length of each side of equilateral tri
+  # sep = separation distance of consecutive particles
+  # type = type of all particles
+
+  def tri2d(self,*params):
+    n = params[0]
+    sep = params[1]
+    type = params[2]
+
+    length = (n-1) * sep
+    
+    atoms = []
+    for i in range(n):
+      x,y,z = i*sep,0.0,0.0
+      atoms.append([type,x,y,z])
+    for i in range(1,n):
+      x,y,z = i*sep*cos(pi/3.0),i*sep*sin(pi/3.0),0.0
+      atoms.append([type,x,y,z])
+    for i in range(1,n-1):
+      x,y,z = length-i*sep*cos(pi/3.0),i*sep*sin(pi/3.0),0.0
+      atoms.append([type,x,y,z])
+
+    volume = (3*n-2) * pi / 6.0     # need to account for overlap and 2d/3d
+    return atoms,[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = m1,m2,m3,m4,m5,m6,ntype,m1type,m2type,m3type,m4type,m5type,m6type

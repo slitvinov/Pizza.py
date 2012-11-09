@@ -1,6 +1,6 @@
 "Pizza.py WWW Site"_pws - "Pizza.py Documentation"_pd - "Pizza.py Tools"_pc :c
 
-:link(pws,http://www.cs.sandia.gov/~sjplimp/pizza.html)
+:link(pws,http://pizza.sandia.gov)
 :link(pd,Manual.html)
 :link(pc,Section_tools.html)
 

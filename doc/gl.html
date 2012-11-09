@@ -1,5 +1,5 @@
 <HTML>
-<CENTER><A HREF = "http://www.cs.sandia.gov/~sjplimp/pizza.html">Pizza.py WWW Site</A> - <A HREF = "Manual.html">Pizza.py Documentation</A> - <A HREF = "Section_tools.html">Pizza.py Tools</A> 
+<CENTER><A HREF = "http://pizza.sandia.gov">Pizza.py WWW Site</A> - <A HREF = "Manual.html">Pizza.py Documentation</A> - <A HREF = "Section_tools.html">Pizza.py Tools</A> 
 </CENTER>
 
 
@@ -89,13 +89,13 @@ is reloaded.
 </P>
 <P><B>Usage:</B>
 </P>
-<PRE>g = gl(d)                   create OpenGL display for data in d 
+<PRE>g = gl(d)                   create OpenGL display for data in d
+g = gl(d,N)                 window of size NxN (def = 512x512)
+g = gl(d,N,M)               window of size NxM 
 </PRE>
 <PRE>  d = atom snapshot object (dump, data) 
 </PRE>
 <PRE>g.bg("black")               set background color (def = "black")
-g.size(N)		    set image size to NxN
-g.size(N,M)		    set image size to NxM
 g.rotate(60,135)            view from z theta and azimuthal phi (def = 60,30)
 g.shift(x,y)                translate by x,y pixels in view window (def = 0,0)
 g.zoom(0.5)                 scale image by factor (def = 1)

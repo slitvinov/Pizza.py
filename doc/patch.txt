@@ -1,6 +1,6 @@
 "Pizza.py WWW Site"_pws - "Pizza.py Documentation"_pd - "Pizza.py Tools"_pc :c
 
-:link(pws,http://www.cs.sandia.gov/~sjplimp/pizza.html)
+:link(pws,http://pizza.sandia.gov)
 :link(pd,Manual.html)
 :link(pc,Section_tools.html)
 
@@ -55,16 +55,20 @@ p = patch(vfrac)           setup box with a specified volume fraction
 p = patch(vfrac,1,1,2)     x,y,z = aspect ratio of box (def = 1,1,1) :pre
 
 p.seed = 48379		   set random # seed (def = 12345)
-p.randomized = 0	   1 = choose next particle randomly, 0 = as generated
+p.randomized = 0	   1 = choose next mol randomly (def), 0 = as generated
 p.dim = 2		   set dimension of created box (def = 3)
 p.blen = 0.97              set length of tether bonds (def = 0.97)
 p.dmin = 1.02              set min r from i-1 to i+1 tether site (def = 1.02)
-p.lattice = \[Nx,Ny,Nz\]     generate Nx by Ny by Nz lattice of particles :pre
+p.lattice = \[Nx,Ny,Nz\]     generate Nx by Ny by Nz lattice of particles
+p.displace = \[Dx,Dy,Dz\]    displace particles randomly by +/- Dx,Dy,Dz :pre
 
-  if lattice is set, Nx*Ny*Nz must equal N for build
-  lattice = \[0,0,0\] = generate N particles randomly, default :pre
+  randomized means choose molecules in random order when creating output
+  if lattice is set, Nx*Ny*Nz must equal N for build (Nz = 1 for 2d)
+  lattice = \[0,0,0\] = generate N particles randomly = default
+  displace = \[0,0,0\] = default
+  displacement applied when writing molecule to data file :pre
 
-p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with types 1,2,3 :pre
+p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with params 1,2,3 :pre
 
   can be invoked multiple times
   keywords:
@@ -76,10 +80,11 @@ p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with types 1,2,3 :pre
     tri5: 1,2 = 3-layer 5-size hollow tri, types 1,2
     rod: N,m1,m2,1,2,3 = N-length rod with m12-len tethers, types 1,2,3
     tri: N,m1,m2,m3,1,2,3,4 = N-size tri with m123-len tethers, types 1-4
+    trid2d: N,r,1 = 3d equilateral tri, N beads r apart, type 1, no bonds
     hex: m1,m2,m3,m4,m5,m6,1,2,3,4,5,6,7 = 7-atom hex with m-len tethers, t 1-7
     dimer: r,1 = two particles r apart, type 1, no bond
     star2d: N,r,1 = 2d star of length N (odd), beads r apart, type 1, no bonds
-    box2d: N,M,r,1 = 2d NxM box, beads r apart, type 1, no bonds
+    box2d: N,M,r,1 = 2d NxM hollow box, beads r apart, type 1, no bonds
     tritet: A,m = 4-tri tet with edge length A, tri type m
     tribox: Alo,Ahi,Blo,Bhi,Clo,Chi,m = 12-tri box with side lengths A,B,C & m
     linebox: Alo,Ahi,Blo,Bhi,m = 4-line 2d rectangle with random side lengths

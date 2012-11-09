@@ -1,5 +1,5 @@
 <HTML>
-<CENTER><A HREF = "Section_install.html">Previous Section</A> - <A HREF = "http://www.cs.sandia.gov/~sjplimp/pizza.html">Pizza.py WWW Site</A> -
+<CENTER><A HREF = "Section_install.html">Previous Section</A> - <A HREF = "http://pizza.sandia.gov">Pizza.py WWW Site</A> -
 <A HREF = "Manual.html">Pizza.py Documentation</A> - <A HREF = "Section_tools.html">Pizza.py Tools</A> - <A HREF = "Section_tools.html">Next
 Section</A> 
 </CENTER>
@@ -82,9 +82,13 @@ directories you list in the src/DEFAULTS.py file.  This means you can
 add your own scripts to pizza/scripts or to directories of your
 choosing.
 </P>
-<P>The argument of the -c switch will typically need to be enclosed in
-quotes to avoid being interpreted by the shell.  This also allows
-multiple Python commands to be separated by semi-colons, e.g.
+<P>Note that the arguments of the -f switch file (arg1,arg2,etc) cannot
+begin with a single "-" or they will be interpreted as arguments to
+Pizza.py.  They can however begin with a double "--".
+</P>
+<P>Also note that the argument of the -c switch will typically need to be
+enclosed in quotes to avoid being interpreted by the shell.  This also
+allows multiple Python commands to be separated by semi-colons, e.g.
 </P>
 <PRE>-c "a = range(100); print a" 
 </PRE>

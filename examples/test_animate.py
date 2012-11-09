@@ -1,7 +1,7 @@
 # simple test of animate tool
 # requires files/bucky*png files
 
-a = animate("files/bucky*png")
+a = animate("files/bucky*gif")
 a.play()
 a.delay(0.1)
 a.back()

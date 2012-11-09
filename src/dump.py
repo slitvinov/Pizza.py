@@ -175,6 +175,8 @@ d.extra(obj)				   extract bond/tri/line info from obj
 #     time = time stamp
 #     tselect = 0/1 if this snapshot selected
 #     natoms = # of atoms
+#     boxstr = format string after BOX BOUNDS, if it exists
+#     triclinic = 0/1 for orthogonal/triclinic based on BOX BOUNDS fields
 #     nselect = # of selected atoms in this snapshot
 #     aselect[i] = 0/1 for each atom
 #     xlo,xhi,ylo,yhi,zlo,zhi = box bounds (float)
@@ -343,6 +345,12 @@ class dump:
       snap.aselect = np.zeros(snap.natoms)
 
       item = f.readline()
+      words = item.split("BOUNDS ")
+      if len(words) == 1: snap.boxstr = ""
+      else: snap.boxstr = words[1].strip()
+      if "xy" in snap.boxstr: snap.triclinic = 1
+      else: snap.triclinic = 0
+      
       words = f.readline().split()
       if len(words) == 2:
         snap.xlo,snap.xhi,snap.xy = float(words[0]),float(words[1]),0.0
@@ -695,10 +703,16 @@ class dump:
         print >>f,snap.time
         print >>f,"ITEM: NUMBER OF ATOMS"
         print >>f,snap.nselect
-        print >>f,"ITEM: BOX BOUNDS"
-        print >>f,snap.xlo,snap.xhi
-        print >>f,snap.ylo,snap.yhi
-        print >>f,snap.zlo,snap.zhi
+        if snap.boxstr: print >>f,"ITEM: BOX BOUNDS",snap.boxstr
+        else: print >>f,"ITEM: BOX BOUNDS"
+        if snap.triclinic:
+          print >>f,snap.xlo,snap.xhi,snap.xy
+          print >>f,snap.ylo,snap.yhi,snap.xz
+          print >>f,snap.zlo,snap.zhi,snap.yz
+        else:
+          print >>f,snap.xlo,snap.xhi
+          print >>f,snap.ylo,snap.yhi
+          print >>f,snap.zlo,snap.zhi
         print >>f,"ITEM: ATOMS",namestr
       
       atoms = snap.atoms
@@ -731,10 +745,16 @@ class dump:
       print >>f,snap.time
       print >>f,"ITEM: NUMBER OF ATOMS"
       print >>f,snap.nselect
-      print >>f,"ITEM: BOX BOUNDS"
-      print >>f,snap.xlo,snap.xhi
-      print >>f,snap.ylo,snap.yhi
-      print >>f,snap.zlo,snap.zhi
+      if snap.boxstr: print >>f,"ITEM: BOX BOUNDS",snap.boxstr
+      else: print >>f,"ITEM: BOX BOUNDS"
+      if snap.triclinic:
+        print >>f,snap.xlo,snap.xhi,snap.xy
+        print >>f,snap.ylo,snap.yhi,snap.xz
+        print >>f,snap.zlo,snap.zhi,snap.yz
+      else:
+        print >>f,snap.xlo,snap.xhi
+        print >>f,snap.ylo,snap.yhi
+        print >>f,snap.zlo,snap.zhi
       print >>f,"ITEM: ATOMS",namestr
       
       atoms = snap.atoms

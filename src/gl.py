@@ -12,12 +12,12 @@ oneline = "3d interactive visualization via OpenGL"
 
 docstr = """
 g = gl(d)                   create OpenGL display for data in d
+g = gl(d,N)                 window of size NxN (def = 512x512)
+g = gl(d,N,M)               window of size NxM
 
   d = atom snapshot object (dump, data)
 
 g.bg("black")               set background color (def = "black")
-g.size(N)		    set image size to NxN
-g.size(N,M)		    set image size to NxM
 g.rotate(60,135)            view from z theta and azimuthal phi (def = 60,30)
 g.shift(x,y)                translate by x,y pixels in view window (def = 0,0)
 g.zoom(0.5)                 scale image by factor (def = 1)
@@ -136,11 +136,19 @@ class gl:
 
 # --------------------------------------------------------------------
 
-  def __init__(self,data):
+  def __init__(self,data,*args):
     self.data = data
     self.root = None
-    self.xpixels = 512
-    self.ypixels = 512
+    if len(args) == 0:
+      self.xpixels = 512
+      self.ypixels = 512
+    elif len(args) == 1:
+      self.xpixels = args[0]
+      self.ypixels = args[0]
+    elif len(args) == 2:
+      self.xpixels = args[0]
+      self.ypixels = args[1]
+    else: raise StandardError,"invalid args to gl tool"
     self.ztheta = 60
     self.azphi = 30
     self.scale = 1.0
@@ -204,11 +212,11 @@ class gl:
 
   # --------------------------------------------------------------------
 
-  def size(self,xnew,ynew=None):
-    self.xpixels = xnew
-    if not ynew: self.ypixels = self.xpixels
-    else: self.ypixels = ynew
-    self.create_window()
+  #def size(self,xnew,ynew=None):
+  #  self.xpixels = xnew
+  #  if not ynew: self.ypixels = self.xpixels
+  #  else: self.ypixels = ynew
+  #  self.create_window()
     
   # --------------------------------------------------------------------
 
