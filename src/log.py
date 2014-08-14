@@ -219,6 +219,8 @@ class log:
     if self.style == 1:
       s1 = txt.find(self.firststr)
       s2 = txt.find("\n--",s1)
+      if (s2 == -1):
+        s2 = txt.find("\nLoop time of",s1)
       pattern = "\s(\S*)\s*="
       keywords = re.findall(pattern,txt[s1:s2])
       keywords.insert(0,"Step")

@@ -38,10 +38,11 @@ describe the version you have. :ule,l
 
 Pizza.py is a loosely integrated collection of tools written in
 Python, many of which provide pre- and post-processing capability for
-the "LAMMPS"_lammps molecular dynamics and "ChemCell"_cccell cell
-simulator packages.  There are tools to create input files, convert
-between file formats, process log and dump files, create plots, and
-visualize and animate simulation snapshots.
+the "LAMMPS"_lammps molecular dynamics, "ChemCell"_cccell cell
+simulator, and "SPARTA"_sparta Direcct Simulation Monte Carlo (DSMC)
+packages.  There are tools to create input files, convert between file
+formats, process log and dump files, create plots, and visualize and
+animate simulation snapshots.
 
 The name Pizza.py is meant to evoke the aroma of a collection of
 "toppings" that the user can combine in different ways on a "crust" of
@@ -60,8 +61,9 @@ uses.
 :link(bug,http://www.cs.sandia.gov/pizza/bug.html)
 :link(sjp,http://www.cs.sandia.gov/~sjplimp)
 :link(doe,http://www.doe.gov)
-:link(lammps,http://www.cs.sandia.gov/~sjplimp/lammps.html)
-:link(ccell,http://www.cs.sandia.gov/~sjplimp/chemcell.html)
+:link(lammps,http://lammps.sandia.gov)
+:link(ccell,http://chemcell.sandia.gov)
+:link(sparta,http://sparta.sandia.gov)
 
 :line
 
@@ -104,7 +106,6 @@ List of tools in Pizza.py:
 "cdata.py"_cdata.html; Read, write, manipulate "ChemCell"_ccell data files
 "chain.py"_chain.html; Create bead-spring chains for LAMMPS input
 "cfg.py"_cfg.html; Convert LAMMPS snapshots to CFG format
-"clog.py"_clog.html; Read "ChemCell"_ccell log files and extract species data
 "data.py"_data.html; Read, write, manipulate LAMMPS data files
 "dump.py"_dump.html; Read, write, manipulate dump files and particle attributes
 "ensight.py"_ensight.html; Convert LAMMPS snapshots to "Ensight"_ensight format
@@ -116,12 +117,14 @@ List of tools in Pizza.py:
 "log.py"_log.html; Read LAMMPS log files and extract thermodynamic data
 "matlab.py"_matlab.html; Create plots via "MatLab"_matlab numerical analysis program
 "mdump.py"_mdump.html; Read, write, manipulate mesh dump files
+"olog.py"_olog.html; Read other log files (ChemCell, SPPARKS, SPARTA) and extract time-series data
 "pair.py"_pair.html; Compute LAMMPS pairwise energies
 "patch.py"_patch.html; Create patchy Lennard-Jones particles for LAMMPS input
 "pdbfile.py"_pdbfile.html; Read, write PDB files in combo with LAMMPS snapshots
 "plotview.py"_plotview.html; Plot multiple vectors from a data set
 "rasmol.py"_rasmol.html; 3d visualization via "RasMol"_rasmol program
 "raster.py"_raster.html; 3d visualization via "Raster3d"_raster3d program
+"sdata.py"_sdata.html; Read, write, manipulate "SPARTA"_sparta surface files
 "svg.py"_svg.html; 3d visualization via "SVG"_svg files
 "tdump.py"_tdump.html; Read LAMMPS dump files with triangle info
 "vcr.py"_vcr.html; VCR-style GUI for 3d interactive OpenGL visualization

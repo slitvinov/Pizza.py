@@ -53,7 +53,7 @@ l.write("file.txt","Time","PE",...)  write listed vectors to a file :pre
 
 [Related tools:]
 
-"clog"_clog.html, "plotview"_plotview.html, "gnu"_gnu.html,
+"olog"_olog.html, "plotview"_plotview.html, "gnu"_gnu.html,
 "matlab"_matlab.html
 
 [Prerequisites:] none

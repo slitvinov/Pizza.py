@@ -345,6 +345,13 @@ box was as simple as:
 
 sudo python setup.py install :pre
 
+(Sep 2012) A user reports, you can also then do this:
+
+cd src
+sudo python togl.py
+
+which should enable Togl with PyOpenGL
+
 :line
 
 readline :h4

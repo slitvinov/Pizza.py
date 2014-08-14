@@ -180,6 +180,11 @@ class bdump:
       snap.natoms = int(f.readline())
       item = f.readline()
 
+      f.readline()    # read past BOX BOUNDS
+      f.readline()
+      f.readline()
+      f.readline()
+
       if snap.natoms:
         words = f.readline().split()
         ncol = len(words)

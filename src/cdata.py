@@ -800,8 +800,6 @@ class cdata:
       # bracket pt = xyz +/- scale*dir
       # multiply scale by factor each iteration
 
-      #print "AAA",i,start,stop,x,y,z,dir
-      
       scale = EPS
       bracket = start
       while scale < maxscale:
@@ -1166,7 +1164,7 @@ class cdata:
     return 0,0,-1
 
   # --------------------------------------------------------------------
-  # return list of atoms and triangles to viz for cdata object
+  # return list of atoms and triangles and lines to viz for cdata object
 
   def viz(self,isnap):
     if isnap:

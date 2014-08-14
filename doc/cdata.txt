@@ -14,11 +14,13 @@ Read, create, manipulate ChemCell data files.
 
 [Description:]
 
-The cdata tool reads and writes ChemCell data files which contain
-particle and surface information.  It enables the creation of
+The cdata tool reads and writes "ChemCell"_chemcell data files which
+contain particle and surface information.  It enables the creation of
 geometric models of cells for input to ChemCell.
 
-The cdata constructor reads in the specified LAMMPS data file.  With
+:link(chemcell,http://chemcell.sandia.gov)
+
+The cdata constructor reads in the specified ChemCell data file.  With
 no argument, an empty cdata object is created which can have objects
 added to it later, and then be written out.
 
@@ -213,7 +215,7 @@ time,box,atoms,bonds,tris,lines = c.viz(index)   return list of viz objects :pre
 
 [Related tools:]
 
-"clog"_clog.html, "data"_data.html, "gl"_gl.html,
+"olog"_olog.html, "data"_data.html, "gl"_gl.html,
 "raster"_raster.html, "svg"_svg.html
 
 [Prerequisites:] none

@@ -25,7 +25,9 @@ description of each tool.
 </P>
 <DIV ALIGN=center><TABLE  BORDER=1 >
 <TR><TD >LAMMPS in/out files</TD><TD > chain, data, dump, log, patch, bdump, ldump, tdump</TD></TR>
-<TR><TD >ChemCell in/out files</TD><TD > cdata, clog, dump</TD></TR>
+<TR><TD >ChemCell in/out files</TD><TD > cdata, olog, dump</TD></TR>
+<TR><TD >SPPARKS in/out files</TD><TD > olog, dump</TD></TR>
+<TR><TD >SPARTA in/out files</TD><TD > sdata, olog, dump</TD></TR>
 <TR><TD >Visualization</TD><TD > gl, rasmol, raster, svg, vmd</TD></TR>
 <TR><TD >File conversion</TD><TD > cfg, ensight, pdbfile, vtk, xyz</TD></TR>
 <TR><TD >GUI wrappers</TD><TD > animate, image, plotview, vcr</TD></TR>
@@ -49,7 +51,6 @@ tool's documentation page.
 <TR><TD ><A HREF = "data.html">cdata.py</A></TD><TD > Read, write, manipulate <A HREF = "http://www.cs.sandia.gov/~sjplimp/cell.html">Chemcell</A> data files</TD></TR>
 <TR><TD ><A HREF = "chain.html">chain.py</A></TD><TD > Create bead-spring chains for LAMMPS input</TD></TR>
 <TR><TD ><A HREF = "cfg.html">cfg.py</A></TD><TD > Convert LAMMPS snapshots to CFG format</TD></TR>
-<TR><TD ><A HREF = "clog.html">clog.py</A></TD><TD > Read <A HREF = "http://www.cs.sandia.gov/~sjplimp/cell.html">ChemCell</A> log files and extract species data</TD></TR>
 <TR><TD ><A HREF = "data.html">data.py</A></TD><TD > Read, write, manipulate LAMMPS data files</TD></TR>
 <TR><TD ><A HREF = "dump.html">dump.py</A></TD><TD > Read, write, manipulate dump files and particle attributes</TD></TR>
 <TR><TD ><A HREF = "ensight.html">ensight.py</A></TD><TD > Convert LAMMPS snapshots to <A HREF = "http://www.ensight.com">Ensight</A> format</TD></TR>
@@ -61,12 +62,14 @@ tool's documentation page.
 <TR><TD ><A HREF = "log.html">log.py</A></TD><TD > Read LAMMPS log files and extract thermodynamic data</TD></TR>
 <TR><TD ><A HREF = "matlab.html">matlab.py</A></TD><TD > Create plots via <A HREF = "http://www.mathworks.com">MatLab</A> numerical analysis program</TD></TR>
 <TR><TD ><A HREF = "mdump.html">mdump.py</A></TD><TD > Read, write, manipulate mesh dump files</TD></TR>
+<TR><TD ><A HREF = "olog.html">olog.py</A></TD><TD > Read other log files (ChemCell, SPPARKS, SPARTA) and extract time-series data</TD></TR>
 <TR><TD ><A HREF = "pair.html">pair.py</A></TD><TD > Compute LAMMPS pairwise energies</TD></TR>
 <TR><TD ><A HREF = "patch.html">patch.py</A></TD><TD > Create patchy Lennard-Jones particles for LAMMPS input</TD></TR>
 <TR><TD ><A HREF = "pdbfile.html">pdbfile.py</A></TD><TD > Read, write PDB files in combo with LAMMPS snapshots</TD></TR>
 <TR><TD ><A HREF = "plotview.html">plotview.py</A></TD><TD > Plot multiple vectors from a data set</TD></TR>
 <TR><TD ><A HREF = "rasmol.html">rasmol.py</A></TD><TD > 3d visualization via <A HREF = "http://www.openrasmol.org">RasMol</A> program</TD></TR>
 <TR><TD ><A HREF = "raster.html">raster.py</A></TD><TD > 3d visualization via <A HREF = "http://www.bmsc.washington.edu/raster3d/raster3d.html">Raster3d</A> program</TD></TR>
+<TR><TD ><A HREF = "sdata.html">sdata.py</A></TD><TD > Read, write, manipulate <A HREF = "sparta">SPARTA</A> surface files</TD></TR>
 <TR><TD ><A HREF = "svg.html">svg.py</A></TD><TD > 3d visualization via <A HREF = "http://www.w3.org/Graphics/SVG">SVG</A> files</TD></TR>
 <TR><TD ><A HREF = "tdump.html">tdump.py</A></TD><TD > Read LAMMPS dump files with triangle info</TD></TR>
 <TR><TD ><A HREF = "vcr.html">vcr.py</A></TD><TD > VCR-style GUI for 3d interactive OpenGL visualization</TD></TR>

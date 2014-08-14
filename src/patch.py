@@ -8,7 +8,7 @@
 
 # patch tool
 
-oneline = "Create patchy Lennard-Jones particles for LAMMPS input"
+oneline = "Create patchy or rigid particles for LAMMPS input"
 
 docstr = """
 p = patch(vfrac)           setup box with a specified volume fraction
@@ -21,12 +21,18 @@ p.blen = 0.97              set length of tether bonds (def = 0.97)
 p.dmin = 1.02              set min r from i-1 to i+1 tether site (def = 1.02)
 p.lattice = [Nx,Ny,Nz]     generate Nx by Ny by Nz lattice of particles
 p.displace = [Dx,Dy,Dz]    displace particles randomly by +/- Dx,Dy,Dz
+p.style = "sphere"         atom-style of data file, molecular or sphere
+p.extra = "Molecules"      add extra Molecules section to data file
+p.extratype = 1            add extra atom types when write data file
 
   randomized means choose molecules in random order when creating output
   if lattice is set, Nx*Ny*Nz must equal N for build (Nz = 1 for 2d)
   lattice = [0,0,0] = generate N particles randomly = default
   displace = [0,0,0] = default
   displacement applied when writing molecule to data file
+  style = molecular by default
+  style is auto-set to line,tri,box by corresponding keywords
+  extratype = 0 by default
 
 p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with params 1,2,3
   
@@ -45,12 +51,19 @@ p.build(100,"hex2",1,2,3)  create 100 "hex2" particles with params 1,2,3
     dimer: r,1 = two particles r apart, type 1, no bond
     star2d: N,r,1 = 2d star of length N (odd), beads r apart, type 1, no bonds
     box2d: N,M,r,1 = 2d NxM hollow box, beads r apart, type 1, no bonds
+    pgon2d: Nlo,Nhi,m = 2d hollow polygons with random N beads from Nlo to Nhi
+    sphere3d: Nlo,Nhi,m = 3d hollow spheres with random N beads/cube-edge 
+                          from Nlo to Nhi
     tritet: A,m = 4-tri tet with edge length A, tri type m
     tribox: Alo,Ahi,Blo,Bhi,Clo,Chi,m = 12-tri box with side lengths A,B,C & m
     linebox: Alo,Ahi,Blo,Bhi,m = 4-line 2d rectangle with random side lengths
                                  from Alo to Ahi and Blo to Bhi, line type m
+                                 built of line particles
     linetri: Alo,Ahi,Blo,Bhi,m = 3-line 2d triangle with random base
                                  from Alo to Ahi and height Blo to Bhi, type m
+                                 built of triangle particles
+    bodypgon: Nlo,Nhi,m = 2d polygons with random N particles from Nlo to Nhi
+                                 built of body particles
     
 p.write("data.patch")      write out system to LAMMPS data file
 """
@@ -61,6 +74,7 @@ p.write("data.patch")      write out system to LAMMPS data file
 # ToDo list
 
 # Variables
+#   style = atom-style of output data file (e.g. molecular)
 #   vfrac = desired volume fraction
 #   x,y,z = aspect ratio of box (def = 1,1,1)
 #   seed = random seed
@@ -68,7 +82,7 @@ p.write("data.patch")      write out system to LAMMPS data file
 
 # Imports and external programs
 
-from math import sqrt,pi,cos,sin
+from math import pi,sqrt,cos,sin
 from data import data
 
 # Class definition
@@ -94,19 +108,19 @@ class patch:
     self.lattice = [0,0,0]
     self.displace = [0.0,0.0,0.0]
     self.style = "molecular"
-
+    self.extra = ""
+    self.extratype = 0
+    
   # --------------------------------------------------------------------
   # call style method with extra args
   # adds to volume and atom list
   # reset self.style for lines and triangles
 
   def build(self,n,style,*types):
-    if style == "linebox" or style == "linetri": self.style = "line"
-    if style == "tritet" or style == "tribox": self.style = "tri"
-    cmd = "atoms,bonds,tris,segments,volume = self.%s(*types)" % style
+    cmd = "atoms,bonds,tris,segments,bodies,volume = self.%s(*types)" % style
     for i in xrange(n):
       exec cmd
-      self.molecules.append([atoms,bonds,tris,segments])
+      self.molecules.append([atoms,bonds,tris,segments,bodies])
       self.volume += volume
 
   # --------------------------------------------------------------------
@@ -144,9 +158,11 @@ class patch:
     atoms = []
     bonds = []
     tris = []
+    mols = []
     xp = 3*[0]
     yp = 3*[0]
     zp = 3*[0]
+    maxtypes = 0
 
     while self.molecules:
       if self.randomized: i = int(self.random()*len(self.molecules))
@@ -233,6 +249,26 @@ class patch:
           ix = iy = iz = 0
           x,y,z,ix,iy,iz = self.pbc(x,y,z,ix,iy,iz)
           atoms.append([idatom,idmol,atom[0],x,y,z,ix,iy,iz])
+          mols.append((idatom,idmol))
+          maxtypes = max(maxtypes,atom[0])
+          
+      elif self.style == "sphere":
+        for atom in molecule[0]:
+          idatom += 1
+          xnew = atom[1]
+          ynew = atom[2]
+          znew = atom[3]
+          x = xorig + xnew*xp[0] + ynew*yp[0] + znew*zp[0]
+          y = yorig + xnew*xp[1] + ynew*yp[1] + znew*zp[1]
+          z = zorig + xnew*xp[2] + ynew*yp[2] + znew*zp[2]
+          x += (self.random()-0.5)*2*self.displace[0]
+          y += (self.random()-0.5)*2*self.displace[1]
+          z += (self.random()-0.5)*2*self.displace[2]
+          ix = iy = iz = 0
+          x,y,z,ix,iy,iz = self.pbc(x,y,z,ix,iy,iz)
+          atoms.append([idatom,atom[0],1.0,1.0,x,y,z,ix,iy,iz])
+          mols.append((idatom,idmol))
+          maxtypes = max(maxtypes,atom[0])
           
       elif self.style == "tri":
         for i,atom in enumerate(molecule[0]):
@@ -249,6 +285,8 @@ class patch:
           if not triples: triflag = 0
           else: triflag = 1
           atoms.append([idatom,idmol,atom[0],triflag,mass,x,y,z,ix,iy,iz])
+          mols.append((idatom,idmol))
+          maxtypes = max(maxtypes,atom[0])
           
           if triflag:
             triple = triples[i]
@@ -280,17 +318,16 @@ class patch:
 
     # create the data file
 
-    list = [atom[2] for atom in atoms]
-    atypes = max(list)
-    
     d = data()
     d.title = "LAMMPS data file for Nanoparticles"
     d.headers["atoms"] = len(atoms)
-    d.headers["atom types"] = atypes
+    d.headers["atom types"] = maxtypes + self.extratype
     if bonds:
       d.headers["bonds"] = len(bonds)
       d.headers["bond types"] = 1
     if tris: d.headers["triangles"] = len(tris)
+
+    if tris: print "TRIS",len(tris),d.headers["triangles"]
     d.headers["xlo xhi"] = (self.xlo,self.xhi)
     d.headers["ylo yhi"] = (self.ylo,self.yhi)
     d.headers["zlo zhi"] = (self.zlo,self.zhi)
@@ -303,6 +340,12 @@ class patch:
         one = "%d %d %d %g %g %g %d %d %d\n" % \
             (atom[0], atom[1], atom[2], atom[3], atom[4], atom[5],
              atom[6], atom[7], atom[8])
+        records.append(one)
+    elif self.style == "sphere":
+      for atom in atoms:
+        one = "%d %d %g %g %g %g %g %d %d %d\n" % \
+            (atom[0], atom[1], atom[2], atom[3], atom[4], atom[5],
+             atom[6], atom[7], atom[8], atom[9])
         records.append(one)
     elif self.style == "tri":
       for atom in atoms:
@@ -319,7 +362,7 @@ class patch:
       for bond in bonds:
         line = "%d %d %d %d\n" % (bond[0], bond[1], bond[2], bond[3])
         lines.append(line)
-        d.sections["Bonds"] = lines
+      d.sections["Bonds"] = lines
 
      # triangles section of data file
 
@@ -330,7 +373,16 @@ class patch:
             (tri[0],tri[1],tri[2],tri[3],tri[4],tri[5],
              tri[6],tri[7],tri[8],tri[9])
         records.append(one)
-        d.sections["Triangles"] = records
+      d.sections["Triangles"] = records
+
+    # extra Molecules section if requested
+      
+    if self.extra == "Molecules":
+      records = []
+      for mol in mols:
+        one = "%d %d\n" % (mol[0],mol[1])
+        records.append(one)
+      d.sections["Molecules"] = records
 
     d.write(file)
 
@@ -360,8 +412,11 @@ class patch:
     atoms = []
     bonds = []
     lines = []
+    bodies = []
+    mols = []
     xp = 3*[0]
     yp = 3*[0]
+    maxtypes = 0
 
     while self.molecules:
       if self.randomized: i = int(self.random()*len(self.molecules))
@@ -370,6 +425,7 @@ class patch:
         
       idmol += 1
       segments = []
+      subs = []
       
       # xp[2],yp[2] = randomly oriented, normalized basis vectors
       # xp is in random direction
@@ -399,14 +455,14 @@ class patch:
         zorig = 0.0
         
       # unpack bonds in molecule before atoms so idatom = all previous atoms
+      # segments = molecule[3] field = displacement from associated atom
+      # subs = molecule[4] field = sub-particle displacements from body atom
       
       for bond in molecule[1]:
         idbond += 1
         bonds.append([idbond,bond[0],bond[1]+idatom+1,bond[2]+idatom+1])
-
-      # unpack segments in molecule as displacements from associated atom
-        
-      for segment in molecule[3]: segments.append(segment)
+      segments = molecule[3]
+      subs = molecule[4]
 
       # unpack atoms in molecule
       # xnew,ynew,xnew = coeffs in new rotated basis vectors
@@ -427,6 +483,24 @@ class patch:
           ix = iy = iz = 0
           x,y,z,ix,iy,iz = self.pbc(x,y,z,ix,iy,iz)
           atoms.append([idatom,idmol,atom[0],x,y,z,ix,iy,iz])
+          mols.append((idatom,idmol))
+          maxtypes = max(maxtypes,atom[0])
+
+      elif self.style == "sphere":
+        for i,atom in enumerate(molecule[0]):
+          idatom += 1
+          xnew = atom[1]
+          ynew = atom[2]
+          x = xorig + xnew*xp[0] + ynew*yp[0]
+          y = yorig + xnew*xp[1] + ynew*yp[1]
+          z = atom[3]
+          x += (self.random()-0.5)*2*self.displace[0]
+          y += (self.random()-0.5)*2*self.displace[1]
+          ix = iy = iz = 0
+          x,y,z,ix,iy,iz = self.pbc(x,y,z,ix,iy,iz)
+          atoms.append([idatom,atom[0],1.0,1.0,x,y,z,ix,iy,iz])
+          mols.append((idatom,idmol))
+          maxtypes = max(maxtypes,atom[0])
 
       elif self.style == "line":
         for i,atom in enumerate(molecule[0]):
@@ -442,6 +516,8 @@ class patch:
           if not segments: lineflag = 0
           else: lineflag = 1
           atoms.append([idatom,idmol,atom[0],lineflag,mass,x,y,z,ix,iy,iz])
+          mols.append((idatom,idmol))
+          maxtypes = max(maxtypes,atom[0])
 
           if lineflag:
             segment = segments[i]
@@ -459,19 +535,54 @@ class patch:
                 self.pbc_near(segment[2],segment[3],0,x,y,z)
             lines.append([idatom] + segment)
             
+      elif self.style == "body":
+        atom = molecule[0][0]
+        idatom += 1
+        xnew = atom[1]
+        ynew = atom[2]
+        x = xorig + xnew*xp[0] + ynew*yp[0]
+        y = yorig + xnew*xp[1] + ynew*yp[1]
+        z = atom[3]
+        mass = atom[4]
+        ix = iy = iz = 0
+        x,y,z,ix,iy,iz = self.pbc(x,y,z,ix,iy,iz)
+        if not subs: bodyflag = 0
+        else: bodyflag = 1
+        atoms.append([idatom,atom[0],bodyflag,mass,x,y,z,ix,iy,iz])
+        mols.append((idatom,idmol))
+        maxtypes = max(maxtypes,atom[0])
+        
+        if bodyflag:
+          ivalues = [mass]
+          for one in subs:
+            x = one[0]
+            y = one[1]
+            one[0] = x*xp[0] + y*yp[0]
+            one[1] = x*xp[1] + y*yp[1]
+          inertia = [0,0,0,0,0,0]
+          for one in subs:
+            inertia[0] += one[1]*one[1] + one[2]*one[2]
+            inertia[1] += one[0]*one[0] + one[2]*one[2]
+            inertia[2] += one[0]*one[0] + one[1]*one[1]
+            inertia[3] -= one[0]*one[1]
+            inertia[4] -= one[0]*one[2]
+            inertia[5] -= one[1]*one[2]
+          dvalues = inertia
+          for one in subs:
+            dvalues += one
+          bodies.append([idatom,ivalues,dvalues])
+            
     # create the data file
-
-    list = [atom[2] for atom in atoms]
-    atypes = max(list)
 
     d = data()
     d.title = "LAMMPS data file for Nanoparticles"
     d.headers["atoms"] = len(atoms)
-    d.headers["atom types"] = atypes
+    d.headers["atom types"] = maxtypes + self.extratype
     if bonds:
       d.headers["bonds"] = len(bonds)
       d.headers["bond types"] = 1
     if lines: d.headers["lines"] = len(lines)
+    if bodies: d.headers["bodies"] = len(bodies)
     d.headers["xlo xhi"] = (self.xlo,self.xhi)
     d.headers["ylo yhi"] = (self.ylo,self.yhi)
     d.headers["zlo zhi"] = (self.zlo,self.zhi)
@@ -485,11 +596,23 @@ class patch:
             (atom[0], atom[1], atom[2], atom[3], atom[4], atom[5],
              atom[6], atom[7], atom[8])
         records.append(one)
+    elif self.style == "sphere":
+      for atom in atoms:
+        one = "%d %d %g %g %g %g %g %d %d %d\n" % \
+            (atom[0], atom[1], atom[2], atom[3], atom[4], atom[5],
+             atom[6], atom[7], atom[8], atom[9])
+        records.append(one)
     elif self.style == "line":
       for atom in atoms:
         one = "%d %d %d %d %g %g %g %g %d %d %d\n" % \
             (atom[0], atom[1], atom[2], atom[3], atom[4], atom[5],
              atom[6], atom[7], atom[8], atom[9], atom[10])
+        records.append(one)
+    elif self.style == "body":
+      for atom in atoms:
+        one = "%d %d %d %d %g %g %g %g %d %d\n" % \
+            (atom[0], atom[1], atom[2], atom[3], atom[4], atom[5],
+             atom[6], atom[7], atom[8], atom[9])
         records.append(one)
     d.sections["Atoms"] = records
 
@@ -500,17 +623,54 @@ class patch:
       for bond in bonds:
         one = "%d %d %d %d\n" % (bond[0], bond[1], bond[2], bond[3])
         records.append(one)
-        d.sections["Bonds"] = records
+      d.sections["Bonds"] = records
 
-     # lines section of data file
+    # lines section of data file
 
     if lines:
       records = []
       for line in lines:
         one = "%d %g %g %g %g\n" % (line[0],line[1],line[2],line[3],line[4])
         records.append(one)
-        d.sections["Lines"] = records
+      d.sections["Lines"] = records
 
+    # bodies section of data file
+    # print ivalues and dvalues in sets of 10 per line
+
+    if bodies:
+      records = []
+      for body in bodies:
+        ivalues = body[1]
+        dvalues = body[2]
+        one = "%d %d %d\n" % (body[0],len(ivalues),len(dvalues))
+        records.append(one)
+        i = 0
+        while i < len(ivalues):
+          list = ivalues[i:min(i+10,len(ivalues)+1)]
+          one = ""
+          for value in list: one += "%g " % int(value)
+          one += "\n"
+          records.append(one)
+          i += len(list)
+        i = 0
+        while i < len(dvalues):
+          list = dvalues[i:min(i+10,len(dvalues)+1)]
+          one = ""
+          for value in list: one += "%g " % float(value)
+          one += "\n"
+          records.append(one)
+          i += len(list)
+      d.sections["Bodies"] = records
+
+    # extra Molecules section if requested
+
+    if self.extra == "Molecules":
+      records = []
+      for mol in mols:
+        one = "%d %d\n" % (mol[0],mol[1])
+        records.append(one)
+      d.sections["Molecules"] = records
+      
     d.write(file)
 
   # --------------------------------------------------------------------
@@ -561,7 +721,7 @@ class patch:
                [params[3],[61]]]
     atoms = make_sphere(template,diam,params[1],patches)
     volume = 4.0/3.0 * pi * diam*diam*diam/8
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
   
   # --------------------------------------------------------------------
   # params = diam,type1,type2
@@ -592,7 +752,7 @@ class patch:
     atoms.append(atom_on_sphere(diam,type2,-0.5*diam,-0.5,-sqrt(3.0)/2))
 
     volume = 4.0/3.0 * pi * diam*diam*diam/8
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
   
   # --------------------------------------------------------------------
   # params = diam,type1,type2
@@ -639,7 +799,7 @@ class patch:
     atoms.append(atom_on_sphere(diam,type2,-0.5,-0.5*diam,-sqrt(3.0)/2))
 
     volume = 4.0/3.0 * pi * diam*diam*diam/8
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = diam,nring,type1,type2
@@ -660,7 +820,7 @@ class patch:
                     0.5*diam*sin(i * 2*pi/nring),0.0])
 
     volume = 4.0/3.0 * pi * diam*diam*diam/8
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = diam,m1,m2,ntype,m1type,m2type
@@ -699,7 +859,7 @@ class patch:
     if m1 and m2: bonds.append([3,1,m1+1])
       
     volume = 4.0/3.0 * pi * diam*diam*diam/8 + (m1+m2)*pi/6.0
-    return atoms,bonds,[],[],volume
+    return atoms,bonds,[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = type1,type2
@@ -723,7 +883,7 @@ class patch:
         atoms.append([type,x,y,z])
 
     volume = nlayer * 0.5 * 5.0 * 5.0*sqrt(3)/2
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = n,m1,m2,ntype,m1type,m2type
@@ -757,7 +917,7 @@ class patch:
       else: bonds.append([1,n+m1+i-1,n+m1+i])
   
     volume = (n+m1+m2) * pi / 6.0
-    return atoms,bonds,[],[],volume
+    return atoms,bonds,[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = nsize,m1,m2,m3,ntype,m1type,m2type,m3type
@@ -801,7 +961,7 @@ class patch:
       else: bonds.append([1,n+m1+m2+i-1,n+m1+m2+i])
 
     volume = (nsize*(nsize+1)/2 + m1+m2+m3) * pi / 6.0
-    return atoms,bonds,[],[],volume
+    return atoms,bonds,[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = N,sep,type
@@ -828,7 +988,7 @@ class patch:
       atoms.append([type,x,y,z])
 
     volume = (3*n-2) * pi / 6.0     # need to account for overlap and 2d/3d
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = m1,m2,m3,m4,m5,m6,ntype,m1type,m2type,m3type,m4type,m5type,m6type
@@ -894,7 +1054,7 @@ class patch:
       else: bonds.append([1,n+m1+m2+m3+m4+m5+i-1,n+m1+m2+m3+m4+m5+i])
 
     volume = (7 + m1+m2+m3+m4+m5+m6) * pi / 6.0
-    return atoms,bonds,[],[],volume
+    return atoms,bonds,[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = sep,type
@@ -912,7 +1072,7 @@ class patch:
     atoms.append([type,x,y,z])
 
     volume = 2 * pi / 6.0     # need to account for overlap and 2d/3d
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = N,sep,type
@@ -943,7 +1103,7 @@ class patch:
       atoms.append([type,x,y,z])
 
     volume = (2*n-1) * pi / 6.0     # need to account for overlap and 2d/3d
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = N,M,sep,type
@@ -975,7 +1135,89 @@ class patch:
       atoms.append([type,x,y,z])
 
     volume = (2*(n+m-2)) * pi / 6.0     # need to account for overlap and 2d/3d
-    return atoms,[],[],[],volume
+    return atoms,[],[],[],[],volume
+
+  # --------------------------------------------------------------------
+  # params = Nlo,Nhi,type
+  # polygon with random N particles from Nlo to Nhi
+  # type = type of all particles
+
+  def pgon2d(self,*params):
+    nlo = int(params[0])
+    nhi = int(params[1])
+    type = params[2]
+
+    n = int(nlo + self.random()*(nhi+1-nlo))
+
+    # N sub-particles around perimeter of polygon in xy plane
+    # rad set so that successive sub-particles are distance 1.0 apart
+    # adjust sub-particle coords so COM is at (0,0,0)
+
+    list = []
+    rad = sqrt(0.5/(1-cos(2.0*pi/n)))
+    for i in xrange(n):
+      theta = 2.0*pi * i/n
+      list.append([rad*cos(theta),rad*sin(theta),0])
+
+    com = [0,0]
+    for one in list:
+      com[0] += one[0]
+      com[1] += one[1]
+    com[0] /= n
+    com[1] /= n
+    for one in list:
+      one[0] -= com[0]
+      one[1] -= com[1]
+    
+    atoms = []
+    for one in list:
+      atoms.append([type,one[0],one[1],0.0])
+
+    volume = n*pi / 6.0
+    return atoms,[],[],[],[],volume
+
+  # --------------------------------------------------------------------
+  # params = Nlo,Nhi,type
+  # sphere made from cube faces projected to sphere
+  # random N particles on each cube edge from Nlo to Nhi
+  # type = type of all particles
+
+  def sphere3d(self,*params):
+    nlo = int(params[0])
+    nhi = int(params[1])
+    type = params[2]
+
+    n = int(nlo + self.random()*(nhi+1-nlo))
+
+    # N sub-particles around edges of cube faces
+    # rad set so that cube corners are on surface of sphere
+
+    list = []
+    rad = sqrt(3.0)/2.0 * (n-1)
+
+    atoms = []
+    for i in range(n):
+      for j in range(n):
+        c = [-0.5 + 1.0*i/n, -0.5 + 1.0*j/n, -0.5]
+        scale = rad/sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2])
+        atoms.append([type,scale*c[0],scale*c[1],scale*c[2]])
+        atoms.append([type,scale*c[0],scale*c[1],-scale*c[2]])
+    for i in range(n):
+      for k in range(1,n-1):
+        c = [-0.5 + 1.0*i/n, -0.5, -0.5 + 1.0*k/n]
+        scale = rad/sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2])
+        atoms.append([type,scale*c[0],scale*c[1],scale*c[2]])
+        atoms.append([type,scale*c[0],-scale*c[1],scale*c[2]])
+    for j in range(1,n-1):
+      for k in range(1,n-1):
+        c = [-0.5, -0.5 + 1.0*i/n, -0.5 + 1.0*k/n]
+        scale = rad/sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2])
+        atoms.append([type,scale*c[0],scale*c[1],scale*c[2]])
+        atoms.append([type,-scale*c[0],scale*c[1],scale*c[2]])
+
+    ntotal = 2 * (n*n + n*(n-2) + (n-2)*(n-2))
+    volume = ntotal*pi / 6.0
+    return atoms,[],[],[],[],volume
 
   # --------------------------------------------------------------------
   # params = a,type
@@ -983,6 +1225,7 @@ class patch:
   # type = type of each vertex in tet
   
   def tritet(self,*params):
+    self.style = "tri"
     a = params[0]
     type = params[1]
     cubeside = a/sqrt(2)
@@ -1017,7 +1260,7 @@ class patch:
                   (c2[2]+c3[2]+c4[2])/3.0])
 
     volume = sqrt(2)/12 * a*a*a
-    return atoms,[],tris,[],volume
+    return atoms,[],tris,[],[],volume
 
   # --------------------------------------------------------------------
   # params = Alo,Ahi,Blo,Bhi,Clo,Chi,type
@@ -1027,6 +1270,7 @@ class patch:
   # type = type of each vertex in rectangular box
   
   def tribox(self,*params):
+    self.style = "tri"
     alo = params[0]
     ahi = params[1]
     blo = params[2]
@@ -1096,7 +1340,7 @@ class patch:
                   (c5[2]+c8[2]+c7[2])/3.0])
 
     volume = a*b*c
-    return atoms,[],tris,[],volume
+    return atoms,[],tris,[],[],volume
 
   # --------------------------------------------------------------------
   # params = Alo,Ahi,Blo,Bhi,type
@@ -1105,6 +1349,7 @@ class patch:
   # type = type of each line segment in rectangle
   
   def linebox(self,*params):
+    self.style = "line"
     alo = float(params[0])
     ahi = float(params[1])
     blo = float(params[2])
@@ -1132,7 +1377,7 @@ class patch:
     segments.append([0,b/2,0,-b/2])
 
     volume = a*b
-    return atoms,[],[],segments,volume
+    return atoms,[],[],segments,[],volume
 
   # --------------------------------------------------------------------
   # params = Alo,Ahi,Blo,Bhi,type
@@ -1141,6 +1386,7 @@ class patch:
   # type = type of each line segment in triangle
   
   def linetri(self,*params):
+    self.style = "line"
     alo = float(params[0])
     ahi = float(params[1])
     blo = float(params[2])
@@ -1166,7 +1412,50 @@ class patch:
     segments.append([base/4,ht/2,-base/4,-ht/2])
 
     volume = 0.5*base*ht
-    return atoms,[],[],segments,volume
+    return atoms,[],[],segments,[],volume
+
+  # --------------------------------------------------------------------
+  # params = Nlo,Nhi,type
+  # polygon with random N sub-particles from Nlo to Nhi
+  # type = type of each entire body particle
+  
+  def bodypgon(self,*params):
+    self.style = "body"
+    nlo = int(params[0])
+    nhi = int(params[1])
+    type = params[2]
+
+    n = int(nlo + self.random()*(nhi+1-nlo))
+
+    atoms = []
+    bodies = []
+
+    # 1 body atom at COM = (0,0,0)
+    # append sub-particle count as mass
+
+    atoms.append([type,0,0,0,n])
+
+    # N sub-particles around perimeter of polygon in xy plane
+    # rad set so that successive sub-particles are distance 1.0 apart
+    # adjust sub-particle coords so COM is at (0,0,0)
+
+    rad = sqrt(0.5/(1-cos(2.0*pi/n)))
+    for i in xrange(n):
+      theta = 2.0*pi * i/n
+      bodies.append([rad*cos(theta),rad*sin(theta),0])
+
+    com = [0,0]
+    for body in bodies:
+      com[0] += body[0]
+      com[1] += body[1]
+    com[0] /= n
+    com[1] /= n
+    for body in bodies:
+      body[0] -= com[0]
+      body[1] -= com[1]
+
+    volume = n
+    return atoms,[],[],[],bodies,volume
 
   # --------------------------------------------------------------------
 

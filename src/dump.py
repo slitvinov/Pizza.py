@@ -179,7 +179,7 @@ d.extra(obj)				   extract bond/tri/line info from obj
 #     triclinic = 0/1 for orthogonal/triclinic based on BOX BOUNDS fields
 #     nselect = # of selected atoms in this snapshot
 #     aselect[i] = 0/1 for each atom
-#     xlo,xhi,ylo,yhi,zlo,zhi = box bounds (float)
+#     xlo,xhi,ylo,yhi,zlo,zhi,xy,xz,yz = box bounds (float)
 #     atoms[i][j] = 2d array of floats, i = 0 to natoms-1, j = 0 to ncols-1
 
 # Imports and external programs
@@ -471,9 +471,10 @@ class dump:
       yprdinv = 1.0 / (snap.yhi - snap.ylo)
       zprdinv = 1.0 / (snap.zhi - snap.zlo)
       atoms = snap.atoms
-      atoms[:,x] = (atoms[:,x] - snap.xlo) * xprdinv
-      atoms[:,y] = (atoms[:,y] - snap.ylo) * yprdinv
-      atoms[:,z] = (atoms[:,z] - snap.zlo) * zprdinv
+      if atoms != None:
+        atoms[:,x] = (atoms[:,x] - snap.xlo) * xprdinv
+        atoms[:,y] = (atoms[:,y] - snap.ylo) * yprdinv
+        atoms[:,z] = (atoms[:,z] - snap.zlo) * zprdinv
     else:
       xlo_bound = snap.xlo; xhi_bound = snap.xhi
       ylo_bound = snap.ylo; yhi_bound = snap.yhi
@@ -500,13 +501,14 @@ class dump:
       h4inv = (h3*h5 - h1*h4) / (h0*h1*h2)
       h5inv = xy / (h0*h1)
       atoms = snap.atoms
-      atoms[:,x] = (atoms[:,x] - snap.xlo)*h0inv + \
-          (atoms[:,y] - snap.ylo)*h5inv + \
-          (atoms[:,z] - snap.zlo)*h4inv
-      atoms[:,y] = (atoms[:,y] - snap.ylo)*h1inv + \
-          (atoms[:,z] - snap.zlo)*h3inv
-      atoms[:,z] = (atoms[:,z] - snap.zlo)*h2inv
-
+      if atoms != None:
+        atoms[:,x] = (atoms[:,x] - snap.xlo)*h0inv + \
+            (atoms[:,y] - snap.ylo)*h5inv + \
+            (atoms[:,z] - snap.zlo)*h4inv
+        atoms[:,y] = (atoms[:,y] - snap.ylo)*h1inv + \
+            (atoms[:,z] - snap.zlo)*h3inv
+        atoms[:,z] = (atoms[:,z] - snap.zlo)*h2inv
+        
   # --------------------------------------------------------------------
   # unscale coords from 0-1 to box size for all snapshots or just one
   # use 6 params as h-matrix to treat orthongonal or triclinic boxes
@@ -533,9 +535,10 @@ class dump:
       yprd = snap.yhi - snap.ylo
       zprd = snap.zhi - snap.zlo
       atoms = snap.atoms
-      atoms[:,x] = snap.xlo + atoms[:,x]*xprd
-      atoms[:,y] = snap.ylo + atoms[:,y]*yprd
-      atoms[:,z] = snap.zlo + atoms[:,z]*zprd
+      if atoms != None:
+        atoms[:,x] = snap.xlo + atoms[:,x]*xprd
+        atoms[:,y] = snap.ylo + atoms[:,y]*yprd
+        atoms[:,z] = snap.zlo + atoms[:,z]*zprd
     else:
       xlo_bound = snap.xlo; xhi_bound = snap.xhi
       ylo_bound = snap.ylo; yhi_bound = snap.yhi
@@ -556,9 +559,10 @@ class dump:
       h4 = xz
       h5 = xy
       atoms = snap.atoms
-      atoms[:,x] = snap.xlo + atoms[:,x]*h0 + atoms[:,y]*h5 + atoms[:,z]*h4
-      atoms[:,y] = snap.ylo + atoms[:,y]*h1 + atoms[:,z]*h3
-      atoms[:,z] = snap.zlo + atoms[:,z]*h2
+      if atoms != None:
+        atoms[:,x] = snap.xlo + atoms[:,x]*h0 + atoms[:,y]*h5 + atoms[:,z]*h4
+        atoms[:,y] = snap.ylo + atoms[:,y]*h1 + atoms[:,z]*h3
+        atoms[:,z] = snap.zlo + atoms[:,z]*h2
         
   # --------------------------------------------------------------------
   # wrap coords from outside box to inside
@@ -641,9 +645,9 @@ class dump:
   # convert column names assignment to a string, in column order
   
   def names2str(self):
-    ncol = len(self.snaps[0].atoms[0])
     pairs = self.names.items()
     values = self.names.values()
+    ncol = len(pairs)
     str = ""
     for i in xrange(ncol):
       if i in values: str += pairs[values.index(i)][0] + ' '

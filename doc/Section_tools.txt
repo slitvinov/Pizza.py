@@ -21,7 +21,9 @@ description of each tool.
 These are the different categories of Pizza.py tools:
 
 LAMMPS in/out files: chain, data, dump, log, patch, bdump, ldump, tdump
-ChemCell in/out files: cdata, clog, dump
+ChemCell in/out files: cdata, olog, dump
+SPPARKS in/out files: olog, dump
+SPARTA in/out files: sdata, olog, dump
 Visualization: gl, rasmol, raster, svg, vmd
 File conversion: cfg, ensight, pdbfile, vtk, xyz
 GUI wrappers: animate, image, plotview, vcr
@@ -43,7 +45,6 @@ tool's documentation page.
 "cdata.py"_data.html; Read, write, manipulate "Chemcell"_ccell data files
 "chain.py"_chain.html; Create bead-spring chains for LAMMPS input
 "cfg.py"_cfg.html; Convert LAMMPS snapshots to CFG format
-"clog.py"_clog.html; Read "ChemCell"_ccell log files and extract species data
 "data.py"_data.html; Read, write, manipulate LAMMPS data files
 "dump.py"_dump.html; Read, write, manipulate dump files and particle attributes
 "ensight.py"_ensight.html; Convert LAMMPS snapshots to "Ensight"_ensight format
@@ -55,12 +56,14 @@ tool's documentation page.
 "log.py"_log.html; Read LAMMPS log files and extract thermodynamic data
 "matlab.py"_matlab.html; Create plots via "MatLab"_matlab numerical analysis program
 "mdump.py"_mdump.html; Read, write, manipulate mesh dump files
+"olog.py"_olog.html; Read other log files (ChemCell, SPPARKS, SPARTA) and extract time-series data
 "pair.py"_pair.html; Compute LAMMPS pairwise energies
 "patch.py"_patch.html; Create patchy Lennard-Jones particles for LAMMPS input
 "pdbfile.py"_pdbfile.html; Read, write PDB files in combo with LAMMPS snapshots
 "plotview.py"_plotview.html; Plot multiple vectors from a data set
 "rasmol.py"_rasmol.html; 3d visualization via "RasMol"_rasmol program
 "raster.py"_raster.html; 3d visualization via "Raster3d"_raster3d program
+"sdata.py"_sdata.html; Read, write, manipulate "SPARTA"_sparta surface files
 "svg.py"_svg.html; 3d visualization via "SVG"_svg files
 "tdump.py"_tdump.html; Read LAMMPS dump files with triangle info
 "vcr.py"_vcr.html; VCR-style GUI for 3d interactive OpenGL visualization

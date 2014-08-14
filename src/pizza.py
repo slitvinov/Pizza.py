@@ -17,7 +17,7 @@
 
 # Help strings:
 
-version = "5 Aug 2012"
+version = "2 Jul 2014"
 
 intro = """
 Pizza.py (%s), a toolkit written in Python

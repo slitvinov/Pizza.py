@@ -350,13 +350,14 @@ class data:
 # --------------------------------------------------------------------
 # data file keywords, both header and main sections
 
-hkeywords = ["atoms","lines","tris",
+hkeywords = ["atoms","ellipsoids","lines","triangles","bodies",
              "bonds","angles","dihedrals","impropers",
 	     "atom types","bond types","angle types","dihedral types",
 	     "improper types","xlo xhi","ylo yhi","zlo zhi","xy xz yz"]
 
 skeywords = [["Masses","atom types"],
-             ["Atoms","atoms"],["Lines","lines"],["Triangles","tris"],
+             ["Atoms","atoms"],["Ellipsoids","ellipsoids"],
+             ["Lines","lines"],["Triangles","triangles"],["Bodies","bodies"],
              ["Bonds","bonds"],
 	     ["Angles","angles"],["Dihedrals","dihedrals"],
 	     ["Impropers","impropers"],["Velocities","atoms"],
@@ -371,4 +372,5 @@ skeywords = [["Masses","atom types"],
              ["AngleTorsion Coeffs","dihedral types"],
              ["AngleAngleTorsion Coeffs","dihedral types"],
              ["BondBond13 Coeffs","dihedral types"],
-             ["AngleAngle Coeffs","improper types"]]
+             ["AngleAngle Coeffs","improper types"],
+             ["Molecules","atoms"]]
